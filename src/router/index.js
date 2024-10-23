@@ -31,17 +31,7 @@ export const constantRouterMap = [
       name: 'home',
       component: () => import('@/views/home/index'),
       meta: {title: '仪表盘', icon: 'dashboard'}
-    },
-    {
-      name: 'document',
-      path: 'https://www.macrozheng.com',
-      meta: {title: '学习教程', icon: 'document'}
-    },
-    {
-      name: 'video',
-      path: 'https://www.macrozheng.com/mall/catalog/mall_video.html',
-      meta: {title: '视频教程', icon: 'video'}
-    },
+    }
     ]
   }
 ]
@@ -53,25 +43,7 @@ export const asyncRouterMap = [
     redirect: '/pms/product',
     name: 'pms',
     meta: {title: '商品', icon: 'product'},
-    children: [{
-      path: 'product',
-      name: 'product',
-      component: () => import('@/views/pms/product/index'),
-      meta: {title: '商品列表', icon: 'product-list'}
-    },
-      {
-        path: 'addProduct',
-        name: 'addProduct',
-        component: () => import('@/views/pms/product/add'),
-        meta: {title: '添加商品', icon: 'product-add'}
-      },
-      {
-        path: 'updateProduct',
-        name: 'updateProduct',
-        component: () => import('@/views/pms/product/update'),
-        meta: {title: '修改商品', icon: 'product-add'},
-        hidden: true
-      },
+    children: [
       {
         path: 'productCate',
         name: 'productCate',
@@ -92,6 +64,46 @@ export const asyncRouterMap = [
         meta: {title: '修改商品分类'},
         hidden: true
       },
+      {
+        path: 'attr',
+        name: 'attr',
+        component: () => import('@/views/pms/attr/index'),
+        meta: {title: '平台属性', icon: 'product-cate'}
+      },
+      {
+        path: 'addProductCate',
+        name: 'addProductCate',
+        component: () => import('@/views/pms/productCate/add'),
+        meta: {title: '添加平台属性'},
+        hidden: true
+      },
+      {
+        path: 'updateProductCate',
+        name: 'updateProductCate',
+        component: () => import('@/views/pms/productCate/update'),
+        meta: {title: '修改商品分类'},
+        hidden: true
+      },
+      {
+        path: 'product',
+        name: 'product',
+        component: () => import('@/views/pms/product/index'),
+        meta: {title: '商品列表', icon: 'product-list'}
+      },
+      {
+        path: 'addProduct',
+        name: 'addProduct',
+        component: () => import('@/views/pms/product/add'),
+        meta: {title: '添加商品', icon: 'product-add'}
+      },
+      {
+        path: 'updateProduct',
+        name: 'updateProduct',
+        component: () => import('@/views/pms/product/update'),
+        meta: {title: '修改商品', icon: 'product-add'},
+        hidden: true
+      },
+     
       {
         path: 'productAttr',
         name: 'productAttr',

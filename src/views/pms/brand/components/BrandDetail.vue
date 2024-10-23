@@ -29,12 +29,7 @@
           <el-radio :label="0">否</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="品牌制造商：">
-        <el-radio-group v-model="brand.factoryStatus">
-          <el-radio :label="1">是</el-radio>
-          <el-radio :label="0">否</el-radio>
-        </el-radio-group>
-      </el-form-item>
+     
       <el-form-item>
         <el-button type="primary" @click="onSubmit('brandFrom')">提交</el-button>
         <el-button v-if="!isEdit" @click="resetForm('brandFrom')">重置</el-button>
