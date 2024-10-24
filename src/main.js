@@ -13,6 +13,11 @@ import App from './App'
 import router from './router'
 import store from './store'
 
+import CategorySelect from '@/components/CategorySelect';
+//组件实例的原型的原型指向的是Vue.prototype
+
+//注册全局组件
+Vue.component( CategorySelect.name, CategorySelect);
 import '@/icons' // icon
 import '@/permission' // permission control
 
