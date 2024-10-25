@@ -7,14 +7,15 @@
     </el-card>
     </el-card>
     <div v-show="isShowTable">
-    <el-card class="operate-container" shadow="never">
-      
+      <el-card class="operate-container" shadow="never">
+      <i class="el-icon-tickets" style="margin-top: 5px"></i>
+      <span style="margin-top: 5px">数据列表</span>
       <el-button
           type="primary"
-          icon="el-icon-plus"
+          class="btn-add"
           :disabled="!category3Id"
-          @click="addAttr"
-          >添加属性</el-button
+          @click="addAttr"  size="mini"
+          >添加平台属性</el-button
         >
     </el-card>
   
@@ -23,6 +24,10 @@
           <el-table-column type="index" label="序号" width="80" align="center">
           </el-table-column>
           <el-table-column prop="attrName" label="属性名称" width="150">
+          </el-table-column>
+          <el-table-column prop="attrName" label="属性是否可选" width="150">
+          </el-table-column>
+          <el-table-column prop="attrName" label="属性值录入方式" width="150">
           </el-table-column>
           <el-table-column prop="prop" label="属性值列表" width="width">
             <template slot-scope="{ row, $index }">
@@ -55,72 +60,58 @@
   
      <!-- 添加属性|修改属性的结构 -->
      <div v-show="!isShowTable">
-      <el-card class="operate-container" shadow="never">
-        <div  class="form-inline">
-        <el-form :inline="true" ref="form" label-width="80px" :model="attrInfo" >
-          <el-form-item label="属性名">
-            <el-input
-              placeholder="请输入属性名"
-              v-model="attrInfo.attrName"
-            ></el-input>
-          </el-form-item>
-        </el-form>
-        <el-button
-          type="primary"
-          icon="el-icon-plus"
-          @click="addAttrValue"
-          :disabled="!attrInfo.attrName"
-          >添加属性值</el-button
-        >
-        <el-button @click="isShowTable = true">取消</el-button>
-      </div>
-        <el-table
-          style="width: 100%; margin: 20px 0px"
-          border
-          :data="attrInfo.attrValueList"
-        >
-          <el-table-column align="center" type="index" label="序号" width="80">
-          </el-table-column>
-          <el-table-column width="width" prop="prop" label="属性值名称">
-            <template slot-scope="{ row, $index }">
-              <!-- 这里结构需要用到span与input进行来回的切换 -->
-              <el-input
-                v-model="row.valueName"
-                placeholder="请输入属性值名称"
-                size="mini"
-                v-if="row.flag"
-                @blur="toLook(row)"
-                @keyup.native.enter="toLook(row)"
-                :ref="$index"
-              ></el-input>
-              <span
-                v-else
-                @click="toEdit(row, $index)"
-                style="display: block"
-                >{{ row.valueName }}</span
-              >
-            </template>
-          </el-table-column>
-          <el-table-column width="width" prop="prop" label="操作">
-            <template slot-scope="{ row, $index }">
-              <!-- 气泡确认框 -->
-              <el-popconfirm :title="`确定删除${row.valueName}?`" @onConfirm="deleteAttrValue($index)">
-                <el-button
-                  type="danger"
-                  icon="el-icon-delete"
-                  size="mini"
-                  slot="reference"
-                ></el-button>
-              </el-popconfirm>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-button type="primary" @click="addOrUpdateAttr" :disabled="attrInfo.attrValueList.length<1">保存</el-button>
-        <el-button @click="isShowTable = true">取消</el-button>
+      <el-card class="form-container" shadow="never">
+      <el-form :model="productAttr" :rules="rules" ref="productAttrFrom" label-width="150px">
+        <el-form-item label="平台属性名称：" prop="name">
+          <el-input v-model="productAttr.name"></el-input>
+        </el-form-item>
+        <el-form-item label="商品分类：">
+          <el-select v-model="productAttr.productAttributeCategoryId" placeholder="请选择">
+            <el-option
+              v-for="item in productAttrCateList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+       
+        <el-form-item label="属性是否可选:">
+          <el-radio-group v-model="productAttr.selectType">
+            <el-radio :label="0">唯一</el-radio>
+            <el-radio :label="1">单选</el-radio>
+            <el-radio :label="2">复选</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="属性值的录入方式:">
+          <el-radio-group v-model="productAttr.inputType">
+            <el-radio :label="0">手工录入</el-radio>
+            <el-radio :label="1">从下面列表中选择</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="属性值可选值列表:">
+          <el-input :autosize="true" type="textarea" v-model="inputListFormat"></el-input>
+        </el-form-item>
+        <el-form-item label="是否支持手动新增:">
+          <el-radio-group v-model="productAttr.handAddStatus">
+            <el-radio :label="1">是</el-radio>
+            <el-radio :label="0">否</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="排序属性：">
+          <el-input v-model="productAttr.sort"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onSubmit('productAttrFrom')">保存</el-button>
+          <el-button  v-if="!isEdit"  @click="isShowTable = true"">取消</el-button>
+          <el-button type="primary" @click="addOrUpdateAttr" :disabled="attrInfo.attrValueList.length<1">保存</el-button>
+          <el-button @click="isShowTable = true">取消</el-button>
+        </el-form-item>
+      </el-form>
       </el-card>
+    
       </div>
     
- 
     
 
   </div>
@@ -138,6 +129,23 @@
   import {fetchList as fetchBrandList} from '@/api/brand'
   import {fetchListWithChildren} from '@/api/productCate'
 
+  import {fetchListOne} from '@/api/productAttrCate'
+
+  
+    const defaultProductAttr = {
+      filterType: 0,
+      handAddStatus: 0,
+      inputList: '',
+      inputType: 0,
+      name: '',
+      productAttributeCategoryId: 0,
+      relatedStatus: 0,
+      searchType: 0,
+      selectType: 0,
+      sort: 0,
+      type: 0
+    };
+
   const defaultListQuery = {
     keyword: null,
     pageNum: 1,
@@ -150,8 +158,23 @@
   };
   export default {
     name: "attr",
+    props: {
+        isEdit: {
+          type: Boolean,
+          default: false
+        }
+      },
     data() {
     return {
+      productAttr: Object.assign({}, defaultProductAttr),
+          rules: {
+            name: [
+              {required: true, message: '请输入属性名称', trigger: 'blur'},
+              {min: 2, max: 140, message: '长度在 2 到 140 个字符', trigger: 'blur'}
+            ]
+          },
+          productAttrCateList: null,
+          inputListFormat:null,
       category1Id: "1",
       category2Id: "11",
       category3Id: "111",
