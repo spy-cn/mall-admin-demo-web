@@ -65,9 +65,9 @@ export const asyncRouterMap = [
         hidden: true
       },
       {
-        path: 'attr',
-        name: 'attr',
-        component: () => import('@/views/pms/attr/index'),
+        path: 'baseAttr',
+        name: 'baseAttr',
+        component: () => import('@/views/pms/baseAttr/index'),
         meta: {title: '平台属性', icon: 'product-cate'}
       },
       {

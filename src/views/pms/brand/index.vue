@@ -24,10 +24,11 @@
       <i class="el-icon-tickets"></i>
       <span>数据列表</span>
       <el-button
+      type="primary"
         class="btn-add"
         @click="addBrand()"
         size="mini">
-        添加
+        添加品牌
       </el-button>
     </el-card>
     <div class="table-container">

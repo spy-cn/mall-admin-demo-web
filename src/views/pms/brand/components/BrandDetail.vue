@@ -32,7 +32,8 @@
      
       <el-form-item>
         <el-button type="primary" @click="onSubmit('brandFrom')">提交</el-button>
-        <el-button v-if="!isEdit" @click="resetForm('brandFrom')">重置</el-button>
+        <el-button type="warning" v-if="!isEdit" @click="resetForm('brandFrom')">重置</el-button>
+        <el-button  v-if="!isEdit"  @click="cancelAddBrand()">取消</el-button>
       </el-form-item>
     </el-form>
   </el-card>
@@ -68,7 +69,7 @@
             {min: 2, max: 140, message: '长度在 2 到 140 个字符', trigger: 'blur'}
           ],
           logo: [
-            {required: true, message: '请输入品牌logo', trigger: 'blur'}
+            {required: false, message: '请输入品牌logo', trigger: 'blur'}
           ],
           sort: [
             {type: 'number', message: '排序必须为数字'}
@@ -113,6 +114,7 @@
                     type: 'success',
                     duration:1000
                   });
+                  this.$router.back();
                 });
               }
             });
@@ -130,6 +132,10 @@
       resetForm(formName) {
         this.$refs[formName].resetFields();
         this.brand = Object.assign({},defaultBrand);
+      },
+      //取消添加品牌
+      cancelAddBrand(){
+        this.$router.push({path: '/pms/brand'})
       }
     }
   }
