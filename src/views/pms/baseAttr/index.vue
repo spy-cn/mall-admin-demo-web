@@ -4,10 +4,7 @@
     <el-card class="filter-container" shadow="never">
       <el-card style="margin: 10px 0px">
         <!--三级下拉列表-->
-        <CategorySelector
-          @listenOnSelect="getAttrInfoList"
-          :show="!isShowTable"
-        />
+        <CategorySelector @listenOnSelect="getAttrInfoList" :show="!isShowTable" />
       </el-card>
     </el-card>
 
@@ -16,115 +13,91 @@
       <el-card class="operate-container" shadow="never">
         <i class="el-icon-tickets" style="margin-top: 5px"></i>
         <span style="margin-top: 5px">数据列表</span>
-        <el-button
-          type="primary"
-          class="btn-add"
-          :disabled="!category3Id"
-          @click="addBaseAttr"
-          size="mini"
-          >添加平台属性</el-button
-        >
+        <el-button type="primary" class="btn-add" :disabled="!category3Id" @click="addBaseAttr"
+          size="mini">添加平台属性</el-button>
       </el-card>
 
       <!-- 表格:展示平台属性 -->
-      <el-table style="width: 100%" border :data="baseAttrList" >
-        <el-table-column type="index" label="序号" width="80" align="center">
+      <el-table ref="productAttrTable" :data="baseAttrList" style="width: 100%"
+        @selection-change="handleSelectionChange" v-loading="listLoading" border>
+        <el-table-column type="selection" width="60" align="center"></el-table-column>
+        <el-table-column label="序号" width="100" align="center">
+          <template slot-scope="scope">{{ scope.$index + 1 }}</template>
         </el-table-column>
-        <el-table-column prop="attrName" label="属性名称" width="150">
+        <el-table-column label="属性名称" width="140" align="center">
+          <template slot-scope="scope">{{ scope.row.attrName }}</template>
         </el-table-column>
-        <el-table-column prop="attrName" label="属性是否可选" width="150">
+        <el-table-column label="属性是否可选" width="120" align="center">
+          <template slot-scope="scope">{{ scope.row.selectType | selectTypeFilter }}</template>
         </el-table-column>
-        <el-table-column prop="attrName" label="属性值录入方式" width="150">
+        <el-table-column label="属性值的录入方式" width="150" align="center">
+          <template slot-scope="scope">{{ scope.row.inputType | inputTypeFilter }}</template>
         </el-table-column>
-        <el-table-column prop="prop" label="属性值列表" width="width">
-            <template slot-scope="{ row, $index }">
-            <el-tag
-              type="success"
-              v-for="(attrValue, index) in row.attrValueList"
-              :key="attrValue.id"
-              style="margin: 0px 20px"
-              >{{ attrValue.valueName }}</el-tag
-            >
-          </template>
-        
-
+        <el-table-column label="可选值列表" align="center">
+          <template slot-scope="scope">{{ scope.row.inputList }}</template>
         </el-table-column>
-        <el-table-column prop="prop" label="操作" width="150">
-          <template slot-scope="{ row, $index }">
-            <el-button
-              type="warning"
-              icon="el-icon-edit"
-              size="mini"
-              @click="updateAttr(row)"
-            ></el-button>
-            <el-button
-              type="danger"
-              icon="el-icon-delete"
-              size="mini"
-            ></el-button>
+        <el-table-column label="排序" width="100" align="center">
+          <template slot-scope="scope">{{ scope.row.sort }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" align="center">
+          <template slot-scope="scope">
+            <el-button type="warning" size="mini" @click="handleUpdate(scope.$index, scope.row)">编辑
+            </el-button>
+            <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
+
     </div>
     <!-- 添加属性|修改属性的结构 -->
     <div v-show="!isShowTable">
       <el-card class="form-container" shadow="never">
-        <el-form
-          :model="baseAttr"
-          :rules="rules"
-          ref="baseAttrFrom"
-          label-width="150px"
-        >
+        <el-form :model="baseAttr" :rules="rules" ref="baseAttrFrom" label-width="150px">
           <el-form-item label="平台属性名称：" prop="name">
             <el-input v-model="baseAttr.name"></el-input>
           </el-form-item>
           <el-form-item label="商品分类：">
-          <el-select v-model="baseAttr.baseAttributeCategoryId" placeholder="请选择">
-            <el-option
-              v-for="item in productAttrCateList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id">
-            </el-option>
-          </el-select>
-        </el-form-item>
-       
-        <el-form-item label="属性是否可选:">
-          <el-radio-group v-model="baseAttr.selectType">
-            <el-radio :label="0">唯一</el-radio>
-            <el-radio :label="1">单选</el-radio>
-            <el-radio :label="2">复选</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="属性值的录入方式:">
-          <el-radio-group v-model="baseAttr.inputType">
-            <el-radio :label="0">手工录入</el-radio>
-            <el-radio :label="1">从下面列表中选择</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="属性值可选值列表:">
-            <el-input :autosize="true" type="textarea" v-model="inputListFormat"></el-input>  
-        </el-form-item>
-        <el-form-item label="是否支持手动新增:">
-          <el-radio-group v-model="baseAttr.handAddStatus">
-            <el-radio :label="1">是</el-radio>
-            <el-radio :label="0">否</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="排序属性：">
-          <el-input v-model="baseAttr.sort"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit('baseAttrFrom')">保存</el-button>
-          <el-button type="warning" v-if="!isEdit" @click="resetForm('baseAttrFrom')">重置</el-button>
-          <el-button  v-if="!isEdit"  @click="isShowTable = true">取消</el-button>
-        </el-form-item>
+            {{ category3Id }}
+            <el-select v-model="baseAttr.baseAttributeCategoryId" placeholder="请选择">
+              <el-option v-for="item in productAttrCateList" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+
+          <el-form-item label="属性是否可选:">
+            <el-radio-group v-model="baseAttr.selectType">
+              <el-radio :label="0">唯一</el-radio>
+              <el-radio :label="1">单选</el-radio>
+              <el-radio :label="2">复选</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="属性值的录入方式:">
+            <el-radio-group v-model="baseAttr.inputType">
+              <el-radio :label="0">手工录入</el-radio>
+              <el-radio :label="1">从下面列表中选择</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="属性值可选值列表:">
+            <el-input :autosize="true" type="textarea" v-model="inputListFormat"></el-input>
+          </el-form-item>
+          <el-form-item label="是否支持手动新增:">
+            <el-radio-group v-model="baseAttr.handAddStatus">
+              <el-radio :label="1">是</el-radio>
+              <el-radio :label="0">否</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="onSubmit('baseAttrFrom')">保存</el-button>
+            <el-button type="warning" v-if="!isEdit" @click="resetForm('baseAttrFrom')">重置</el-button>
+            <el-button v-if="!isEdit" @click="isShowTable = true">取消</el-button>
+          </el-form-item>
         </el-form>
       </el-card>
     </div>
   </div>
 </template>
-  <script>
+<script>
 import CategorySelector from "@/views/components/CategorySelector";
 import prop from "@/api/pms/baseAttr";
 
@@ -132,10 +105,10 @@ import prop from "@/api/pms/baseAttr";
 const defaultBaseAttr = {
   filterType: 0,
   handAddStatus: 0,
-  inputList: "",
+  inputList: [],
   inputType: 0,
   name: "",
-  productAttributeCategoryId: 0,
+  categoryId: 0,
   relatedStatus: 0,
   searchType: 0,
   selectType: 0,
@@ -171,7 +144,7 @@ export default {
           },
         ],
       },
-      productAttrCateList: null,
+      productAttrCateList: [],
       //收集新增属性|修改属性使用的
       attrInfo: {
         attrName: "", //属性名
@@ -233,7 +206,7 @@ export default {
       this.listLoading = true;
       prop.getfindAllBaseAttr().then((response) => {
         this.listLoading = false;
-        this.baseAttrList = response.data.list;
+        this.baseAttrList = response.data;
       });
     },
     // 保存平台属性值
@@ -252,52 +225,72 @@ export default {
       row.spuSaleAttrValueList.splice(index, 1);
     },
     onSubmit(formName) {
-        this.$refs[formName].validate((valid) => {
-          if (valid) {
-            this.$confirm('是否提交数据', '提示', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning'
-            }).then(() => {
-              if(this.isEdit){
-                updateProductAttr(this.$route.query.id,this.productAttr).then(response=>{
-                  this.$message({
-                    message: '修改成功',
-                    type: 'success',
-                    duration: 1000
-                  });
-                  this.$router.back();
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.$confirm('是否提交数据', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            if (this.isEdit) {
+              updateProductAttr(this.$route.query.id, this.baseAttr).then(response => {
+                this.$message({
+                  message: '修改成功',
+                  type: 'success',
+                  duration: 1000
                 });
-              }else{
-                createProductAttr(this.productAttr).then(response=>{
-                  this.$message({
-                    message: '提交成功',
-                    type: 'success',
-                    duration: 1000
-                  });
-                  this.resetForm('productAttrFrom');
+                this.$router.back();
+              });
+            } else {
+              prop.addBaseAttr(this.baseAttr).then(response => {
+                this.$message({
+                  message: '提交成功',
+                  type: 'success',
+                  duration: 1000
                 });
-              }
-            });
+                this.resetForm('baseAttrFrom');
+              });
+            }
+          });
 
-          } else {
-            this.$message({
-              message: '验证失败',
-              type: 'error',
-              duration: 1000
-            });
-            return false;
-          }
-        });
-      },
-      resetForm(formName) {
-        this.$refs[formName].resetFields();
-        this.resetProductAttr();
-      }
+        } else {
+          this.$message({
+            message: '验证失败',
+            type: 'error',
+            duration: 1000
+          });
+          return false;
+        }
+      });
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields();
+      this.resetProductAttr();
+    },
+    //编辑平台属性
+    handleUpdate(index, row) {
+      this.isShowTable = false;
+      this.baseAttr= row;
+    }
   },
+  filters: {
+    inputTypeFilter(value) {
+      if (value === 1) {
+        return '从列表中选取';
+      } else {
+        return '手工录入'
+      }
+    },
+    selectTypeFilter(value) {
+      if (value === 1) {
+        return '单选';
+      } else if (value === 2) {
+        return '多选';
+      } else {
+        return '唯一'
+      }
+    },
+  }
 };
 </script>
-  <style></style>
-  
-  
-  
+<style></style>

@@ -9,6 +9,14 @@ export default {
       method: 'get'
     })
   },
+  //添加平台属性
+  addBaseAttr(data) {
+    return request({
+      url: '/admin/baseAttrInfo/create',
+      method: 'post',
+      data: data
+    })
+  },
 
   // 查找二级分类
   getCategory2(category1Id) {
