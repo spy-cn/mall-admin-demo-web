@@ -17,6 +17,21 @@ export default {
       data: data
     })
   },
+  //修改平台属性
+  updateBasetAttr(id, data) {
+    return request({
+      url: '/admin/baseAttrInfo/update/' + id,
+      method: 'post',
+      data: data
+    })
+  },
+  // 查找基本属性
+  getBaseAttrInfoById(attrInfoId) {
+    return request({
+      url: '/admin/baseAttrInfo/byId/' + attrInfoId,
+      method: 'get'
+    })
+  },
 
   // 查找二级分类
   getCategory2(category1Id) {

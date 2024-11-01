@@ -34,7 +34,7 @@
           <template slot-scope="scope">{{ scope.row.inputType | inputTypeFilter }}</template>
         </el-table-column>
         <el-table-column label="可选值列表" align="center">
-          <template slot-scope="scope">{{ scope.row.inputList }}</template>
+          <template slot-scope="scope">{{ scope.row.inputList }} {{ scope.row }}</template>
         </el-table-column>
         <el-table-column label="排序" width="100" align="center">
           <template slot-scope="scope">{{ scope.row.sort }}</template>
@@ -90,7 +90,7 @@
           <el-form-item>
             <el-button type="primary" @click="onSubmit('baseAttrFrom')">保存</el-button>
             <el-button type="warning" v-if="!isEdit" @click="resetForm('baseAttrFrom')">重置</el-button>
-            <el-button v-if="!isEdit" @click="isShowTable = true">取消</el-button>
+            <el-button  @click="isShowTable = true">取消</el-button>
           </el-form-item>
         </el-form>
       </el-card>
@@ -100,9 +100,11 @@
 <script>
 import CategorySelector from "@/views/components/CategorySelector";
 import prop from "@/api/pms/baseAttr";
+import baseAttr from "../../../api/pms/baseAttr";
 
 //默认平台属性值
 const defaultBaseAttr = {
+  id: 0,
   filterType: 0,
   handAddStatus: 0,
   inputList: [],
@@ -233,7 +235,7 @@ export default {
             type: 'warning'
           }).then(() => {
             if (this.isEdit) {
-              updateProductAttr(this.$route.query.id, this.baseAttr).then(response => {
+              prop.updateBasetAttr(this.baseAttr.id, this.baseAttr).then(response => {
                 this.$message({
                   message: '修改成功',
                   type: 'success',
@@ -248,7 +250,8 @@ export default {
                   type: 'success',
                   duration: 1000
                 });
-                this.resetForm('baseAttrFrom');
+                //this.resetForm('baseAttrFrom');
+                this.$router.back();
               });
             }
           });
@@ -269,8 +272,12 @@ export default {
     },
     //编辑平台属性
     handleUpdate(index, row) {
+      this.isEdit = true;
       this.isShowTable = false;
-      this.baseAttr= row;
+      prop.getBaseAttrInfoById(row.id).then(response => {
+        this.baseAttr = response.data;
+        this.baseAttr.name = response.data.attrName;
+      });
     }
   },
   filters: {
