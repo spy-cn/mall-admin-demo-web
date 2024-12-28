@@ -21,34 +21,56 @@
 
         <el-table-column label="设置" width="200" align="center">
           <template slot-scope="scope">
-            <el-button size="mini" :disabled="scope.row.level | disableNextLevel"
-              @click="handleShowNextLevel(scope.$index, scope.row)">查看下级
+            
+            <el-button
+              size="mini"
+              :disabled="scope.row.children.length==0"
+              @click="handleShowNextLevel(scope.$index, scope.row)"
+              >查看下级
             </el-button>
-
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200" align="center">
           <template slot-scope="scope">
-            <el-button size="mini" @click="handleUpdate(scope.$index, scope.row)">编辑
+            <el-button
+              size="mini"
+              @click="handleUpdate(scope.$index, scope.row)"
+              >编辑
             </el-button>
-            <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除
+            <el-button
+              size="mini"
+              type="danger"
+              @click="handleDelete(scope.$index, scope.row)"
+              >删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
     <div class="pagination-container">
-      <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange"
-        layout="total, sizes,prev, pager, next,jumper" :page-size="listQuery.pageSize" :page-sizes="[5, 10, 15]"
-        :current-page.sync="listQuery.pageNum" :total="total">
+      <el-pagination
+        background
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        layout="total, sizes,prev, pager, next,jumper"
+        :page-size="listQuery.pageSize"
+        :page-sizes="[5, 10, 15]"
+        :current-page.sync="listQuery.pageNum"
+        :total="total"
+      >
       </el-pagination>
     </div>
   </div>
 </template>
 
 <script>
-import { fetchList, deleteProductCate, updateShowStatus, updateNavStatus } from '@/api/productCate'
-
+import {
+  fetchList,
+  deleteProductCate,
+  updateShowStatus,
+  updateNavStatus,
+} from "@/api/productCate";
+import productCategory from "@/api/pms/productCategory";
 export default {
   name: "productCateList",
   data() {
@@ -71,7 +93,7 @@ export default {
     $route(route) {
       this.resetParentId();
       this.getList();
-    }
+    },
   },
   methods: {
     resetParentId() {
@@ -83,14 +105,13 @@ export default {
       }
     },
     handleAddProductCate() {
-      this.$router.push('/pms/addProductCate');
+      this.$router.push("/pms/addProductCate");
     },
     getList() {
       this.listLoading = true;
-      fetchList(this.parentId, this.listQuery).then(response => {
+      productCategory.getCategory().then((response) => {
         this.listLoading = false;
-        this.list = response.data.list;
-        this.total = response.data.total;
+        this.list = response.data;
       });
     },
     handleSizeChange(val) {
@@ -105,78 +126,81 @@ export default {
     handleNavStatusChange(index, row) {
       let data = new URLSearchParams();
       let ids = [];
-      ids.push(row.id)
-      data.append('ids', ids);
-      data.append('navStatus', row.navStatus);
-      updateNavStatus(data).then(response => {
+      ids.push(row.id);
+      data.append("ids", ids);
+      data.append("navStatus", row.navStatus);
+      updateNavStatus(data).then((response) => {
         this.$message({
-          message: '修改成功',
-          type: 'success',
-          duration: 1000
+          message: "修改成功",
+          type: "success",
+          duration: 1000,
         });
       });
     },
     handleShowStatusChange(index, row) {
       let data = new URLSearchParams();
       let ids = [];
-      ids.push(row.id)
-      data.append('ids', ids);
-      data.append('showStatus', row.showStatus);
-      updateShowStatus(data).then(response => {
+      ids.push(row.id);
+      data.append("ids", ids);
+      data.append("showStatus", row.showStatus);
+      updateShowStatus(data).then((response) => {
         this.$message({
-          message: '修改成功',
-          type: 'success',
-          duration: 1000
+          message: "修改成功",
+          type: "success",
+          duration: 1000,
         });
       });
     },
     handleShowNextLevel(index, row) {
-      this.$router.push({ path: '/pms/productCate', query: { parentId: row.id } })
+      this.$router.push({
+        path: "/pms/productCate",
+        query: { parentId: row.id },
+      });
     },
     handleTransferProduct(index, row) {
-      console.log('handleAddProductCate');
+      console.log("handleAddProductCate");
     },
     handleUpdate(index, row) {
-      this.$router.push({ path: '/pms/updateProductCate', query: { id: row.id } });
+      this.$router.push({
+        path: "/pms/updateProductCate",
+        query: { id: row.id },
+      });
     },
     handleDelete(index, row) {
-      this.$confirm('是否要删除该品牌', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+      this.$confirm("是否要删除该品牌", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
       }).then(() => {
-        deleteProductCate(row.id).then(response => {
+        deleteProductCate(row.id).then((response) => {
           this.$message({
-            message: '删除成功',
-            type: 'success',
-            duration: 1000
+            message: "删除成功",
+            type: "success",
+            duration: 1000,
           });
           this.getList();
         });
       });
-    }
+    },
   },
   filters: {
     levelFilter(value) {
-      if (value === 1) {
-        return '一级';
-      } else if (value === 2) {
-        return '二级';
-      } else if (value === 3) {
-        return '三级';
+      if (value === 0) {
+        return "一级";
+      } else if (value === 1) {
+        return "二级";
       }
     },
     disableNextLevel(value) {
-      if (value === 1) {
+      if (value === 0) {
         return false;
-      } else if (value === 2) {
-        return 'false';
       } else {
         return true;
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
-<style scoped></style>
+<style scoped>
+</style>
