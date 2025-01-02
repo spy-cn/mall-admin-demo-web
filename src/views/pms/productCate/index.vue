@@ -8,7 +8,13 @@
       </el-button>
     </el-card>
     <div class="table-container">
-      <el-table ref="productCateTable" style="width: 100%" :data="list" v-loading="listLoading" border>
+      <el-table
+        ref="productCateTable"
+        style="width: 100%"
+        :data="list"
+        v-loading="listLoading"
+        border
+      >
         <el-table-column label="序号" width="100" align="center">
           <template slot-scope="scope">{{ scope.$index + 1 }}</template>
         </el-table-column>
@@ -21,11 +27,16 @@
 
         <el-table-column label="设置" width="200" align="center">
           <template slot-scope="scope">
-            
             <el-button
               size="mini"
-              :disabled="scope.row.children.length==0"
-              @click="handleShowNextLevel(scope.$index, scope.row)"
+              :disabled="scope.row.parentId === 0"
+              @click="handleShowLastLevel(scope.row.parentId)"
+              >查看上级
+            </el-button>
+            <el-button
+              size="mini"
+              :disabled="!scope.row.existChild"
+              @click="handleShowNextLevel(scope.row.id)"
               >查看下级
             </el-button>
           </template>
@@ -34,32 +45,20 @@
           <template slot-scope="scope">
             <el-button
               size="mini"
-              @click="handleUpdate(scope.$index, scope.row)"
+              @click="handleUpdate(scope.row.id, scope.row)"
               >编辑
             </el-button>
             <el-button
               size="mini"
               type="danger"
-              @click="handleDelete(scope.$index, scope.row)"
+              @click="handleDelete(scope.row.id, scope.row)"
               >删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
-    <div class="pagination-container">
-      <el-pagination
-        background
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        layout="total, sizes,prev, pager, next,jumper"
-        :page-size="listQuery.pageSize"
-        :page-sizes="[5, 10, 15]"
-        :current-page.sync="listQuery.pageNum"
-        :total="total"
-      >
-      </el-pagination>
-    </div>
+   
   </div>
 </template>
 
@@ -82,22 +81,49 @@ export default {
         pageNum: 1,
         pageSize: 10
       },
-      parentId: 0
-    }
+      parentId: 0,
+      id:0,
+      type:'down',
+      level:1
+    };
   },
   created() {
+    this.resetLevel();
     this.resetParentId();
     this.getList();
   },
   watch: {
     $route(route) {
+      this.resetLevel();
       this.resetParentId();
+      this.resetId();
+      this.resetType();
       this.getList();
     },
   },
   methods: {
-    resetParentId() {
-      this.listQuery.pageNum = 1;
+    resetType(){
+      if (this.$route.query.type != null) {
+        this.type = this.$route.query.type;
+      } else {
+        this.type = 'down';
+      }
+    },
+    resetLevel() {
+      if (this.$route.query.level != null) {
+        this.level = this.$route.query.level;
+      } else {
+        this.level = 1;
+      }
+    },
+    resetId() {
+      if (this.$route.query.id != null) {
+        this.id = this.$route.query.id;
+      } else {
+        this.id = 0;
+      }
+    },
+    resetParentId(){
       if (this.$route.query.parentId != null) {
         this.parentId = this.$route.query.parentId;
       } else {
@@ -109,10 +135,11 @@ export default {
     },
     getList() {
       this.listLoading = true;
-      productCategory.getCategory().then((response) => {
-        this.listLoading = false;
-        this.list = response.data;
-      });
+      productCategory.fetchListByParentId(this.type,this.parentId)
+        .then((response) => {
+          this.listLoading = false;
+          this.list = response.data;
+        });
     },
     handleSizeChange(val) {
       this.listQuery.pageNum = 1;
@@ -151,10 +178,18 @@ export default {
         });
       });
     },
-    handleShowNextLevel(index, row) {
+    // 查看下一层级
+    handleShowNextLevel(id) {
       this.$router.push({
         path: "/pms/productCate",
-        query: { parentId: row.id },
+        query: { type: 'down',parentId:id},
+      });
+    },
+    //查看上一层级
+    handleShowLastLevel(parentId) {
+      this.$router.push({
+        path: "/pms/productCate",
+        query: { type: 'up',parentId:parentId },
       });
     },
     handleTransferProduct(index, row) {
