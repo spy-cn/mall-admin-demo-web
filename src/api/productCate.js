@@ -13,13 +13,7 @@ export function deleteProductCate(id) {
   })
 }
 
-export function createProductCate(data) {
-  return request({
-    url:'/productCategory/create',
-    method:'post',
-    data:data
-  })
-}
+
 
 export function updateProductCate(id,data) {
   return request({

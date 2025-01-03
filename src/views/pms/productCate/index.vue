@@ -21,9 +21,6 @@
         <el-table-column label="分类名称" align="center">
           <template slot-scope="scope">{{ scope.row.name }}</template>
         </el-table-column>
-        <el-table-column label="级别" width="100" align="center">
-          <template slot-scope="scope">{{ scope.row.level | levelFilter }}</template>
-        </el-table-column>
 
         <el-table-column label="设置" width="200" align="center">
           <template slot-scope="scope">

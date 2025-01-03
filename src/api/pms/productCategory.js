@@ -1,12 +1,28 @@
 import request from '@/utils/request'
 export default {
 
+    //所有商品分类
+    fetchAllCategoryList(){
+        return request({
+            url: `/productCategory/list/all`,
+            method:'get'
+        })
+    },
 
     fetchListByParentId(type,parentId){
         return request({
             url: `/productCategory/list/${type}/${parentId}`,
             method:'get'
         })
+    },
+
+    //添加产品分类
+    createProductCate(data) {
+      return request({
+        url:'/productCategory/create',
+        method:'post',
+        data:data
+      })
     },
 
     //根据level查询分类
